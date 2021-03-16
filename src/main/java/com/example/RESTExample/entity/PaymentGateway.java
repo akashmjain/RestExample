@@ -1,13 +1,11 @@
 package com.example.RESTExample.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class PaymentGateway {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
     @ManyToOne
@@ -15,10 +13,18 @@ public class PaymentGateway {
     private Merchant merchant;
     private int amountMin;
     private int amountMax;
-    private boolean cardEnabled;
-    private boolean nbEnabled;
+    private String cardEnabled;
+    private String nbEnabled;
     private String status;
     private int processingFee;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -52,19 +58,19 @@ public class PaymentGateway {
         this.amountMax = amountMax;
     }
 
-    public boolean getCardEnabled() {
+    public String getCardEnabled() {
         return cardEnabled;
     }
 
-    public void setCardEnabled(boolean cardEnabled) {
+    public void setCardEnabled(String cardEnabled) {
         this.cardEnabled = cardEnabled;
     }
 
-    public boolean getNbEnabled() {
+    public String getNbEnabled() {
         return nbEnabled;
     }
 
-    public void setNbEnabled(boolean nbEnabled) {
+    public void setNbEnabled(String nbEnabled) {
         this.nbEnabled = nbEnabled;
     }
 

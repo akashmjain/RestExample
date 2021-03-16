@@ -65,15 +65,15 @@ public class MerchantRestController {
             throw new CustomException("Min Max values are wrong");
         }
         // validate cardEnabled
-        if (!requestBodyPaymentGateway.getCardEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_YES) || !requestBodyPaymentGateway.getCardEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_NO)) {
+        if (!requestBodyPaymentGateway.getCardEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_YES) && !requestBodyPaymentGateway.getCardEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_NO)) {
             throw new CustomException("Invalid cardEnable Field");
         }
         // validate nbEnabled
-        if (!requestBodyPaymentGateway.getNbEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_YES) || !requestBodyPaymentGateway.getNbEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_NO)) {
+        if (!requestBodyPaymentGateway.getNbEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_YES) && !requestBodyPaymentGateway.getNbEnabled().toUpperCase(Locale.ROOT).equals(ENABLE_NO)) {
             throw new CustomException("Invalid nbEnable Field");
         }
         // validate status
-        if (!requestBodyPaymentGateway.getStatus().toUpperCase(Locale.ROOT).equals(STATUS_ACTIVE) || !requestBodyPaymentGateway.getStatus().toUpperCase(Locale.ROOT).equals(STATUS_INACTIVE)) {
+        if (!requestBodyPaymentGateway.getStatus().toUpperCase(Locale.ROOT).equals(STATUS_ACTIVE) && !requestBodyPaymentGateway.getStatus().toUpperCase(Locale.ROOT).equals(STATUS_INACTIVE)) {
             throw new CustomException("Invalid status field");
         }
         PaymentGateway paymentGateway = new PaymentGateway();
@@ -81,8 +81,9 @@ public class MerchantRestController {
         paymentGateway.setMerchant(merchant);
         paymentGateway.setAmountMin(requestBodyPaymentGateway.getAmountMin());
         paymentGateway.setAmountMax(requestBodyPaymentGateway.getAmountMax());
-        paymentGateway.setCardEnabled(requestBodyPaymentGateway.getCardEnabled().equals(ENABLE_YES));
-        paymentGateway.setNbEnabled(requestBodyPaymentGateway.getNbEnabled().equals(ENABLE_YES));
+        System.out.println(requestBodyPaymentGateway.getCardEnabled().equals(ENABLE_YES));
+        paymentGateway.setCardEnabled(requestBodyPaymentGateway.getCardEnabled().toUpperCase(Locale.ROOT));
+        paymentGateway.setNbEnabled(requestBodyPaymentGateway.getNbEnabled().toUpperCase(Locale.ROOT));
         paymentGateway.setStatus(requestBodyPaymentGateway.getStatus());
         paymentGatewayService.save(paymentGateway);
     }
