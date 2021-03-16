@@ -6,6 +6,7 @@ import com.example.RESTExample.error.CustomErrorResponse;
 import com.example.RESTExample.error.CustomException;
 import com.example.RESTExample.pojo.RequestBodyPaymentGateway;
 import com.example.RESTExample.service.MerchantService;
+import com.example.RESTExample.service.PaymentGatewayService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class MerchantRestController {
 
     @Autowired
     MerchantService merchantService;
+
+    @Autowired
+    PaymentGatewayService paymentGatewayService;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -80,7 +84,7 @@ public class MerchantRestController {
         paymentGateway.setCardEnabled(requestBodyPaymentGateway.getCardEnabled().equals(ENABLE_YES));
         paymentGateway.setNbEnabled(requestBodyPaymentGateway.getNbEnabled().equals(ENABLE_YES));
         paymentGateway.setStatus(requestBodyPaymentGateway.getStatus());
-        
+        paymentGatewayService.save(paymentGateway);
     }
 
     @ExceptionHandler
