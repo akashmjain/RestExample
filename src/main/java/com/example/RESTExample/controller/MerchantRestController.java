@@ -48,7 +48,7 @@ public class MerchantRestController {
     }
 
     @PostMapping("/createPG")
-    public void createPaymentGateway(@RequestBody RequestBodyPaymentGateway requestBodyPaymentGateway) {
+    public String createPaymentGateway(@RequestBody RequestBodyPaymentGateway requestBodyPaymentGateway) throws Exception {
         // Checking if user with given name is present or not. if not then giving error response back.
         if (merchantService.findByName(requestBodyPaymentGateway.getMerchantName()).isEmpty()) {
             throw new CustomException("Merchant with name " + requestBodyPaymentGateway.getMerchantName() + " not found.");
@@ -81,11 +81,15 @@ public class MerchantRestController {
         paymentGateway.setMerchant(merchant);
         paymentGateway.setAmountMin(requestBodyPaymentGateway.getAmountMin());
         paymentGateway.setAmountMax(requestBodyPaymentGateway.getAmountMax());
-        System.out.println(requestBodyPaymentGateway.getCardEnabled().equals(ENABLE_YES));
         paymentGateway.setCardEnabled(requestBodyPaymentGateway.getCardEnabled().toUpperCase(Locale.ROOT));
         paymentGateway.setNbEnabled(requestBodyPaymentGateway.getNbEnabled().toUpperCase(Locale.ROOT));
         paymentGateway.setStatus(requestBodyPaymentGateway.getStatus());
         paymentGatewayService.save(paymentGateway);
+        ObjectNode msg = objectMapper.createObjectNode();
+        msg.put("success", true);
+        msg.put("pgName", paymentGateway.getName());
+        msg.put("status", paymentGateway.getStatus());
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(msg);
     }
 
     @ExceptionHandler
