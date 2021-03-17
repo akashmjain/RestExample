@@ -1,7 +1,8 @@
 package com.example.RESTExample.service;
 
 import com.example.RESTExample.entity.PaymentGateway;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public interface PaymentGatewayService {
-    public void save(PaymentGateway paymentGateway);
+    public PaymentGateway saveWithObjectNode(ObjectNode objectNode);
 }

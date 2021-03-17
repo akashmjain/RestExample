@@ -1,5 +1,9 @@
 package com.example.RESTExample.entity;
 
+import com.example.RESTExample.error.CustomException;
+import com.example.RESTExample.service.MerchantService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.persistence.*;
 
 @Entity
