@@ -1,11 +1,12 @@
 package com.example.RESTExample.controller;
 
-import com.example.RESTExample.entity.Merchant;
-import com.example.RESTExample.entity.PaymentGateway;
+import com.example.RESTExample.model.MerchantEntity;
+import com.example.RESTExample.model.PaymentGatewayEntity;
 import com.example.RESTExample.error.CustomErrorResponse;
 import com.example.RESTExample.error.CustomException;
 import com.example.RESTExample.service.MerchantService;
 import com.example.RESTExample.service.PaymentGatewayService;
+import com.example.RESTExample.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,48 +27,33 @@ public class APIRESTController {
     PaymentGatewayService paymentGatewayService;
 
     @Autowired
+    TransactionService transactionService;
+
+    @Autowired
     ObjectMapper objectMapper;
 
     @PostMapping("/createMerchant")
-    public ResponseEntity<String> createMerchant(@RequestBody Merchant merchant) throws Exception {
-        if (merchantService.findByName(merchant.getName()).isPresent()) {
-            throw new CustomException("Merchant already present with the same name");
-        }
-        merchantService.save(merchant);
-        ObjectNode msg = objectMapper.createObjectNode();
-        msg.put("success", true);
-        msg.put("merchantName", merchant.getName());
+    public ResponseEntity<String> createMerchant(@RequestBody MerchantEntity merchantEntity) throws Exception {
+        ObjectNode res = merchantService.save(merchantEntity);
         return ResponseEntity.ok()
                 .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(msg));
+                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @PostMapping("/createPG")
     public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
-        PaymentGateway paymentGateway = paymentGatewayService.saveWithObjectNode(objectNode);
-        ObjectNode msg = objectMapper.createObjectNode();
-        msg.put("success", true);
-        msg.put("pgName", paymentGateway.getName());
-        msg.put("status", paymentGateway.getStatus());
+        ObjectNode res = paymentGatewayService.saveWithObjectNode(objectNode);
         return ResponseEntity.ok()
                 .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(msg));
-    }
-
-    @PostMapping("/test")
-    public ResponseEntity<String> testRequest(@RequestBody ObjectNode objectNode) throws Exception{
-        ObjectNode msg = objectMapper.createObjectNode();
-        msg.put("success", true);
-        msg.put("pgName", "EZETAP");
-        msg.put("status", "ACTIVE");
-        return ResponseEntity.ok()
-                .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(msg));
+                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @PostMapping("/makePayment")
-    public ResponseEntity<String> makePayment() {
-        
+    public ResponseEntity<String> makePayment(@RequestBody ObjectNode objectNode) throws Exception {
+        ObjectNode res = transactionService.makePayment(objectNode);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/json")
+                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @ExceptionHandler

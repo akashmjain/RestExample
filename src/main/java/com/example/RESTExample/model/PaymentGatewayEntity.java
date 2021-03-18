@@ -1,32 +1,31 @@
-package com.example.RESTExample.entity;
-
-import com.example.RESTExample.error.CustomException;
-import com.example.RESTExample.service.MerchantService;
-import org.springframework.beans.factory.annotation.Autowired;
+package com.example.RESTExample.model;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
-public class PaymentGateway {
+public class PaymentGatewayEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     private String name;
     @ManyToOne
     @JoinColumn(name = "merchant")
-    private Merchant merchant;
-    private int amountMin;
-    private int amountMax;
+    private MerchantEntity merchant;
+    private Long amountMin;
+    private Long amountMax;
     private String cardEnabled;
     private String nbEnabled;
     private String status;
-    private int processingFee;
+    private Long processingFee;
+    @OneToMany(mappedBy = "paymentGateway")
+    private List<TransactionEntity> transactions;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -38,27 +37,27 @@ public class PaymentGateway {
         this.name = name;
     }
 
-    public Merchant getMerchant() {
+    public MerchantEntity getMerchant() {
         return merchant;
     }
 
-    public void setMerchant(Merchant merchant) {
+    public void setMerchant(MerchantEntity merchant) {
         this.merchant = merchant;
     }
 
-    public int getAmountMin() {
+    public Long getAmountMin() {
         return amountMin;
     }
 
-    public void setAmountMin(int amountMin) {
+    public void setAmountMin(Long amountMin) {
         this.amountMin = amountMin;
     }
 
-    public int getAmountMax() {
+    public Long getAmountMax() {
         return amountMax;
     }
 
-    public void setAmountMax(int amountMax) {
+    public void setAmountMax(Long amountMax) {
         this.amountMax = amountMax;
     }
 
@@ -86,11 +85,19 @@ public class PaymentGateway {
         this.status = status;
     }
 
-    public int getProcessingFee() {
+    public Long getProcessingFee() {
         return processingFee;
     }
 
-    public void setProcessingFee(int processingFee) {
+    public void setProcessingFee(Long processingFee) {
         this.processingFee = processingFee;
+    }
+
+    public List<TransactionEntity> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<TransactionEntity> transactions) {
+        this.transactions = transactions;
     }
 }
