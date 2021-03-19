@@ -5,7 +5,6 @@ import java.util.List;
 
 @Entity
 public class MerchantEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

@@ -3,6 +3,7 @@ package com.example.RESTExample.controller;
 import com.example.RESTExample.model.MerchantEntity;
 import com.example.RESTExample.error.CustomErrorResponse;
 import com.example.RESTExample.error.CustomException;
+import com.example.RESTExample.model.TransactionEntity;
 import com.example.RESTExample.service.merchant.MerchantService;
 import com.example.RESTExample.service.payment.PaymentGatewayService;
 import com.example.RESTExample.service.transaction.TransactionService;
@@ -11,10 +12,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -58,6 +58,15 @@ public class APIRESTController {
         return ResponseEntity.ok()
                 .header("Content-Type", "application/json")
                 .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
+    }
+
+    @GetMapping("/lastTransaction")
+    public ResponseEntity<String> getTransactions(@RequestParam("value") int value) throws Exception {
+        List<ObjectNode> objectNodes = transactionService.getTransactions(value);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/json")
+                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNodes));
+//        return transactionService.getTransactions(value);
     }
 
     @ExceptionHandler

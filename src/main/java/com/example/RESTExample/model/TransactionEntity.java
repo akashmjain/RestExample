@@ -1,5 +1,7 @@
 package com.example.RESTExample.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 
@@ -10,9 +12,11 @@ public class TransactionEntity {
     private int id;
     @ManyToOne
     @JoinColumn(name = "merchant")
+    @JsonIgnore
     private MerchantEntity merchant;
     @ManyToOne
     @JoinColumn(name = "paymentGateway")
+    @JsonIgnore
     private PaymentGatewayEntity paymentGateway;
     private Long amount;
     private Long totalAmount;
