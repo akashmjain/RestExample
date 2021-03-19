@@ -90,7 +90,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<ObjectNode> getTransactions(int value) {
-        List<TransactionEntity> transactionEntities = transactionRepo.findAll(Sort.by(Sort.Direction.DESC,"timestamp")).subList(0, value);
+        List<TransactionEntity> transactionEntities = transactionRepo.findTransactionEntityBySortOrder(value);
         List<ObjectNode> objectNodes = new ArrayList<>();
         transactionEntities.forEach(trans -> {
             ObjectNode objectNode = objectMapper.createObjectNode();
