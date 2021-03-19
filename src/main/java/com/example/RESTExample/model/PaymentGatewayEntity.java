@@ -7,7 +7,7 @@ import java.util.List;
 public class PaymentGatewayEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
     private String name;
     @ManyToOne
     @JoinColumn(name = "merchant")
@@ -21,11 +21,11 @@ public class PaymentGatewayEntity {
     @OneToMany(mappedBy = "paymentGateway")
     private List<TransactionEntity> transactions;
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 

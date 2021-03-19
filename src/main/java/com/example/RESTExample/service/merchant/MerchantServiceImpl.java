@@ -1,4 +1,4 @@
-package com.example.RESTExample.service;
+package com.example.RESTExample.service.merchant;
 
 import com.example.RESTExample.error.CustomException;
 import com.example.RESTExample.model.MerchantEntity;
@@ -35,5 +35,8 @@ public class MerchantServiceImpl implements MerchantService {
         return merchantRepo.findByName(name);
     }
 
-
+    @Override
+    public Optional<MerchantEntity> findByUsername(String username) {
+        return merchantRepo.findByUsername(username);
+    }
 }

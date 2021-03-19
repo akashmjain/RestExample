@@ -1,12 +1,11 @@
 package com.example.RESTExample.controller;
 
 import com.example.RESTExample.model.MerchantEntity;
-import com.example.RESTExample.model.PaymentGatewayEntity;
 import com.example.RESTExample.error.CustomErrorResponse;
 import com.example.RESTExample.error.CustomException;
-import com.example.RESTExample.service.MerchantService;
-import com.example.RESTExample.service.PaymentGatewayService;
-import com.example.RESTExample.service.TransactionService;
+import com.example.RESTExample.service.merchant.MerchantService;
+import com.example.RESTExample.service.payment.PaymentGatewayService;
+import com.example.RESTExample.service.transaction.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +40,16 @@ public class APIRESTController {
     }
 
     @PostMapping("/createPG")
-    public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
+    public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) {
+
         ObjectNode res = paymentGatewayService.saveWithObjectNode(objectNode);
-        return ResponseEntity.ok()
-                .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
+        try {
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json")
+                    .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
+        } catch (Exception exception) {
+            throw new CustomException("Please Enter properly formatted Payment Gateway data.");
+        }
     }
 
     @PostMapping("/makePayment")

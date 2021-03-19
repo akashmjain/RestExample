@@ -8,7 +8,7 @@ public class MerchantEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
     @Column(unique = true, nullable = false)
     private String name;
     private String username;
@@ -18,11 +18,11 @@ public class MerchantEntity {
     @OneToMany(mappedBy = "merchant")
     private List<TransactionEntity> transactions;
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
