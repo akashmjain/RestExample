@@ -5,4 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public interface PaymentGatewayService {
     public ObjectNode saveWithObjectNode(ObjectNode objectNode);
+
+    ObjectNode updateWithObjectNode(ObjectNode objectNode);
 }

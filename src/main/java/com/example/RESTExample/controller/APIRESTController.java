@@ -3,6 +3,7 @@ package com.example.RESTExample.controller;
 import com.example.RESTExample.model.MerchantEntity;
 import com.example.RESTExample.error.CustomErrorResponse;
 import com.example.RESTExample.error.CustomException;
+import com.example.RESTExample.model.PaymentGatewayEntity;
 import com.example.RESTExample.model.TransactionEntity;
 import com.example.RESTExample.service.merchant.MerchantService;
 import com.example.RESTExample.service.payment.PaymentGatewayService;
@@ -35,38 +36,40 @@ public class APIRESTController {
     public ResponseEntity<String> createMerchant(@RequestBody MerchantEntity merchantEntity) throws Exception {
         ObjectNode res = merchantService.save(merchantEntity);
         return ResponseEntity.ok()
-                .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
+            .header("Content-Type", "application/json")
+            .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @PostMapping("/createPG")
-    public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) {
-
+    public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
         ObjectNode res = paymentGatewayService.saveWithObjectNode(objectNode);
-        try {
-            return ResponseEntity.ok()
-                    .header("Content-Type", "application/json")
-                    .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
-        } catch (Exception exception) {
-            throw new CustomException("Please Enter properly formatted Payment Gateway data.");
-        }
+        return ResponseEntity.ok()
+            .header("Content-Type", "application/json")
+            .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @PostMapping("/makePayment")
     public ResponseEntity<String> makePayment(@RequestBody ObjectNode objectNode) throws Exception {
         ObjectNode res = transactionService.makePayment(objectNode);
         return ResponseEntity.ok()
-                .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
+            .header("Content-Type", "application/json")
+            .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @GetMapping("/lastTransaction")
     public ResponseEntity<String> getTransactions(@RequestParam("value") int value) throws Exception {
         List<ObjectNode> objectNodes = transactionService.getTransactions(value);
         return ResponseEntity.ok()
+            .header("Content-Type", "application/json")
+            .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNodes));
+    }
+
+    @PutMapping("/updatePG")
+    public ResponseEntity<String> updatePaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
+        ObjectNode res = paymentGatewayService.updateWithObjectNode(objectNode);
+        return ResponseEntity.ok()
                 .header("Content-Type", "application/json")
-                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNodes));
-//        return transactionService.getTransactions(value);
+                .body(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(res));
     }
 
     @ExceptionHandler

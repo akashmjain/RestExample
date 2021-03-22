@@ -5,12 +5,14 @@ import com.example.RESTExample.model.PaymentGatewayEntity;
 import com.example.RESTExample.error.CustomException;
 import com.example.RESTExample.repository.PaymentGatewayRepo;
 import com.example.RESTExample.service.merchant.MerchantService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class PaymentGatewayServiceImpl implements PaymentGatewayService {
@@ -20,7 +22,8 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     private final String PAYMENT_GATEWAY_CONST_ENABLE_YES = "YES";
     private final String PAYMENT_GATEWAY_CONST_ENABLE_NO = "NO";
 
-    private final String PAYMENT_GATEWAY_API_PAYMENT_GATEWAY_NAME = "name";
+
+    private final String PAYMENT_GATEWAY_API_PAYMENT_GATEWAY_NAME = "pgName";
     private final String PAYMENT_GATEWAY_API_MERCHANT_NAME = "merchantName";
     private final String PAYMENT_GATEWAY_API_AMOUNT_MIN = "amountMin";
     private final String PAYMENT_GATEWAY_API_AMOUNT_MAX = "amountMax";
@@ -87,5 +90,137 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         return msg;
     }
 
+    @Override
+    public ObjectNode updateWithObjectNode(ObjectNode objectNode) {
+        // check for required fields and throw error like so=
+        requiredFieldsCheck(objectNode);
+        JsonNode pgName = objectNode.get(PAYMENT_GATEWAY_API_PAYMENT_GATEWAY_NAME);
+        JsonNode merchantName = objectNode.get(PAYMENT_GATEWAY_API_MERCHANT_NAME);
+        // validate if merchant with given name is present or not
+        Optional<MerchantEntity> merchant = merchantService.findByName(merchantName.asText());
+        if (merchant.isEmpty()) {
+            throw new CustomException("Merchant with name " + objectNode.get(PAYMENT_GATEWAY_API_MERCHANT_NAME).asText() + " not present.");
+        }
+        // validate if pg with given name is present within merchant or not.
+        PaymentGatewayEntity paymentGateway = null;
+        for (PaymentGatewayEntity pg : merchant.get().getPaymentGateways()) {
+            if (pg.getName().equalsIgnoreCase(pgName.asText())) {
+                paymentGateway = pg;
+                break;
+            }
+        }
+        if (paymentGateway == null) {
+            throw new CustomException("Payment Gateway is not present in given merchant");
+        }
+        if (objectNode.get(PAYMENT_GATEWAY_API_CARD_ENABLED) != null) {
+            validateCardEnabled(objectNode.get(PAYMENT_GATEWAY_API_CARD_ENABLED));
+            paymentGateway.setCardEnabled(objectNode.get(PAYMENT_GATEWAY_API_CARD_ENABLED).asText());
+        }
+        if (objectNode.get(PAYMENT_GATEWAY_API_NB_ENABLED) != null) {
+            validateNbEnabled(objectNode.get(PAYMENT_GATEWAY_API_NB_ENABLED));
+            paymentGateway.setNbEnabled(objectNode.get(PAYMENT_GATEWAY_API_NB_ENABLED).asText());
+        }
+        if (objectNode.get(PAYMENT_GATEWAY_API_STATUS) != null) {
+            validateStatus(objectNode.get(PAYMENT_GATEWAY_API_STATUS));
+            paymentGateway.setStatus(objectNode.get(PAYMENT_GATEWAY_API_STATUS).asText());
+        }
+        if (objectNode.get(PAYMENT_GATEWAY_API_PROCESSING_FEE) != null) {
+            validateProcessingFee(objectNode.get(PAYMENT_GATEWAY_API_PROCESSING_FEE));
+            paymentGateway.setProcessingFee(objectNode.get(PAYMENT_GATEWAY_API_PROCESSING_FEE).asLong());
+        }
+//        checkAndSetAmountMin(objectNode.get(PAYMENT_GATEWAY_API_AMOUNT_MIN), objectNode.get(PAYMENT_GATEWAY_API_AMOUNT_MAX), paymentGateway);
+//        checkAndSetAmountMax(objectNode.get(PAYMENT_GATEWAY_API_AMOUNT_MIN), objectNode.get(PAYMENT_GATEWAY_API_AMOUNT_MAX), paymentGateway);
+//        checkAndSetCardEnabled(objectNode.get(PAYMENT_GATEWAY_API_CARD_ENABLED), paymentGateway);
+//        checkAndSetNbEnabled(objectNode.get(PAYMENT_GATEWAY_API_NB_ENABLED), paymentGateway);
+//        checkAndSetStatus(objectNode.get(PAYMENT_GATEWAY_API_STATUS), paymentGateway);
+//        checkAndSetProcessingFee(objectNode.get(PAYMENT_GATEWAY_API_PROCESSING_FEE), paymentGateway);
+        return null;
+    }
 
+    private void checkAndSetStatus(JsonNode status, PaymentGatewayEntity paymentGateway) {
+        if (status != null) {
+            validateStatus(status);
+            paymentGateway.setStatus(status.asText());
+        }
+    }
+
+    private void validateStatus(JsonNode status) {
+        if (!status.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE) && !status.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_STATUS_INACTIVE)) {
+            throw new CustomException("Invalid status field");
+        }
+    }
+
+    private void checkAndSetProcessingFee(JsonNode processingFee, PaymentGatewayEntity paymentGateway) {
+        if (processingFee != null) {
+            validateProcessingFee(processingFee);
+            paymentGateway.setProcessingFee(processingFee.asLong());
+        }
+    }
+
+    private void validateProcessingFee(JsonNode processingFee) {
+        if (processingFee.asLong() < 0) {
+            throw new CustomException("Invalid Processing fees");
+        }
+    }
+
+    private void checkAndSetNbEnabled(JsonNode nbEnabled, PaymentGatewayEntity paymentGateway) {
+        if (nbEnabled != null) {
+            validateNbEnabled(nbEnabled);
+            paymentGateway.setNbEnabled(nbEnabled.asText());
+
+        }
+    }
+
+    private void validateNbEnabled(JsonNode nbEnabled) {
+        if (!nbEnabled.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_ENABLE_YES) && !nbEnabled.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_ENABLE_NO)) {
+            throw new CustomException("Invalid nbEnable Field");
+        }
+    }
+
+    private void checkAndSetCardEnabled(JsonNode cardEnabled, PaymentGatewayEntity paymentGateway) {
+        if (cardEnabled != null) {
+            validateCardEnabled(cardEnabled);
+            paymentGateway.setCardEnabled(cardEnabled.asText());
+        }
+    }
+
+    private void validateCardEnabled(JsonNode cardEnabled) {
+        if (!cardEnabled.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_ENABLE_YES) && !cardEnabled.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_ENABLE_NO)) {
+            throw new CustomException("Invalid cardEnable Field");
+        }
+    }
+
+    private void checkAndSetAmountMax(JsonNode amountMin, JsonNode amountMax, PaymentGatewayEntity paymentGateway) {
+        if (amountMax != null) {
+            validateAmountMaxAndMin(amountMin, amountMax, paymentGateway);
+            paymentGateway.setAmountMin(aMax);
+        }
+    }
+
+    private void validateAmountMaxAndMin(long aMin, long aMax, PaymentGatewayEntity pg) {
+        if (aMax <= 0 || aMin < 0 || aMax < aMin) {
+            throw new CustomException("Please provide proper min max amount.");
+        }
+    }
+
+    private void checkAndSetAmountMin(JsonNode amountMin, JsonNode amountMax, PaymentGatewayEntity paymentGateway) {
+        if (amountMin != null) {
+            long aMin = amountMin.asLong();
+            long aMax = amountMax == null ? paymentGateway.getAmountMax() : amountMax.asLong();
+            if (aMin >= 0 && aMin < aMax) {
+                paymentGateway.setAmountMin(aMin);
+            } else {
+                throw new CustomException("Please provide proper amountMin property");
+            }
+        }
+    }
+
+    private void requiredFieldsCheck(ObjectNode objectNode) {
+        if (objectNode.get(PAYMENT_GATEWAY_API_PAYMENT_GATEWAY_NAME) == null) {
+            throw new CustomException("Please provide pgName");
+        }
+        if (objectNode.get(PAYMENT_GATEWAY_API_MERCHANT_NAME) == null) {
+            throw new CustomException("Please provide merchantName");
+        }
+    }
 }
