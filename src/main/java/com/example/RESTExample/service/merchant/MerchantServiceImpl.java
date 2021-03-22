@@ -20,6 +20,15 @@ public class MerchantServiceImpl implements MerchantService {
 
     @Override
     public ObjectNode save(MerchantEntity merchantEntity) {
+        if (merchantEntity.getName() == null) {
+            throw new CustomException("Please insert name in your request");
+        }
+        if (merchantEntity.getUsername() == null) {
+            throw new CustomException("Please insert username in your request.");
+        }
+        if (merchantEntity.getPassword() == null) {
+            throw new CustomException("please provide password in your request.");
+        }
         if (this.findByName(merchantEntity.getName()).isPresent()) {
             throw new CustomException("Merchant already present with the same name");
         }

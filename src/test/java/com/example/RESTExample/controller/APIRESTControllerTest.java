@@ -7,12 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 class APIRESTControllerTest {
-
     @Test
-    void createMerchant() {
-    }
-
-    @Test
-    void createPaymentGateway() {
+    public void createMerchantTest() {
     }
 }
