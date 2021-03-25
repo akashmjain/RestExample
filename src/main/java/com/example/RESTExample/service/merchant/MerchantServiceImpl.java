@@ -35,7 +35,7 @@ public class MerchantServiceImpl implements MerchantService {
             throw new CustomException("Please provide password in your request.");
         }
         if (this.findByName(merchantEntity.getName()).isPresent()) {
-            throw new CustomException("Merchant already present with the same name");
+            throw new CustomException("Merchant already present with the same name.");
         }
         merchantRepo.save(merchantEntity);
         ObjectNode msg = objectMapper.createObjectNode();

@@ -1,6 +1,7 @@
 package com.example.RESTExample.model;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -49,14 +50,6 @@ public class MerchantEntity {
     public void setPassword(String password) {
         this.password = password;
     }
-
-//    public List<PaymentGatewayEntity> getPaymentGateways() {
-//        return paymentGatewayEntities;
-//    }
-//
-//    public void setPaymentGateways(List<PaymentGatewayEntity> paymentGatewayEntities) {
-//        this.paymentGatewayEntities = paymentGatewayEntities;
-//    }
 
     public List<PaymentGatewayEntity> getPaymentGatewayEntities() {
         return paymentGatewayEntities;
