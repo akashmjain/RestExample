@@ -59,6 +59,13 @@ public class MerchantEntity {
         this.paymentGatewayEntities = paymentGatewayEntities;
     }
 
+    public void addPaymentGatewayEntity(PaymentGatewayEntity pg) {
+        if (paymentGatewayEntities == null) {
+            paymentGatewayEntities = new ArrayList<>();
+        }
+        paymentGatewayEntities.add(pg);
+    }
+
     public List<TransactionEntity> getTransactions() {
         return transactions;
     }

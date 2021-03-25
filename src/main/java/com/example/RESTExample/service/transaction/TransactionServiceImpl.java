@@ -6,6 +6,7 @@ import com.example.RESTExample.model.PaymentGatewayEntity;
 import com.example.RESTExample.model.TransactionEntity;
 import com.example.RESTExample.repository.TransactionRepo;
 import com.example.RESTExample.service.merchant.MerchantService;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,29 +24,42 @@ public class TransactionServiceImpl implements TransactionService {
     final private String TRANSACTION_API_AMOUNT = "amount";
     final private String TRANSACTION_API_PAYMENT_MODE = "paymentMode";
     final private String TRANSACTION_API_PASSWORD = "password";
-    @Autowired
-    MerchantService merchantService;
-    @Autowired
+    private JsonNode username;
+    private JsonNode merchantName;
+    private JsonNode amount;
+    private JsonNode paymentMode;
+    private JsonNode password;
     TransactionRepo transactionRepo;
-    @Autowired
+    MerchantService merchantService;
     ObjectMapper objectMapper;
+
+    public TransactionServiceImpl(TransactionRepo transactionRepo, MerchantService merchantService, ObjectMapper objectMapper) {
+        this.transactionRepo = transactionRepo;
+        this.merchantService = merchantService;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public ObjectNode makePayment(ObjectNode objectNode) {
-        String  username = objectNode.get(TRANSACTION_API_USERNAME).asText();
-        String  merchantName = objectNode.get(TRANSACTION_API_MERCHANT_NAME).asText();
-        Long  amount = objectNode.get(TRANSACTION_API_AMOUNT).asLong();
-        String  paymentMode = objectNode.get(TRANSACTION_API_PAYMENT_MODE).asText();
-        String  password = objectNode.get(TRANSACTION_API_PASSWORD).asText();
+        username = objectNode.get(TRANSACTION_API_USERNAME);
+        merchantName = objectNode.get(TRANSACTION_API_MERCHANT_NAME);
+        amount = objectNode.get(TRANSACTION_API_AMOUNT);
+        paymentMode = objectNode.get(TRANSACTION_API_PAYMENT_MODE);
+        password = objectNode.get(TRANSACTION_API_PASSWORD);
 
-        Optional<MerchantEntity> merchantEntity = merchantService.findByName(merchantName);
+        validateUsername(username);
+        validateMerchantName(merchantName);
+        validateAmount(amount);
+        validatePaymentMode(paymentMode);
+        validatePassword(password);
+        Optional<MerchantEntity> merchantEntity = merchantService.findByName(merchantName.asText());
         if (merchantEntity.isEmpty()) {
-            throw new CustomException("User not found");
+            throw new CustomException("No such merchant present");
         }
-        if (!merchantEntity.get().getUsername().equals(username)) {
+        if (!merchantEntity.get().getUsername().equals(username.asText())) {
             throw new CustomException("Username is wrong");
         }
-        if (!merchantEntity.get().getPassword().equals(password)) {
+        if (!merchantEntity.get().getPassword().equals(password.asText())) {
             throw new CustomException("Password is wrong");
         }
         // get active payment gateway.
@@ -59,14 +73,14 @@ public class TransactionServiceImpl implements TransactionService {
         if (activePaymentGateway == null) {
             throw new CustomException("No active payment for this merchant");
         }
-        if (amount < activePaymentGateway.getAmountMin() || amount > activePaymentGateway.getAmountMax()) {
+        if (amount.asLong() < activePaymentGateway.getAmountMin() || amount.asLong() > activePaymentGateway.getAmountMax()) {
             throw new CustomException("amount is not within limit");
         }
-        if (paymentMode.equalsIgnoreCase("NB")) {
+        if (paymentMode.asText().equalsIgnoreCase("NB")) {
             if (activePaymentGateway.getNbEnabled().equals("NO")) {
                 throw new CustomException("Net Banking is not allowed");
             }
-        } else if (paymentMode.equalsIgnoreCase("CARD")) {
+        } else if (paymentMode.asText().equalsIgnoreCase("CARD")) {
             if (activePaymentGateway.getCardEnabled().equals("NO")) {
                 throw new CustomException("Card banking is not allowed");
             }
@@ -74,9 +88,9 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionEntity transactionEntity = new TransactionEntity();
         transactionEntity.setPaymentGateway(activePaymentGateway);
         transactionEntity.setMerchant(merchantEntity.get());
-        transactionEntity.setAmount(amount);
-        transactionEntity.setTotalAmount(amount + activePaymentGateway.getProcessingFee());
-        transactionEntity.setPaymentMode(paymentMode);
+        transactionEntity.setAmount(amount.asLong());
+        transactionEntity.setTotalAmount(amount.asLong() + activePaymentGateway.getProcessingFee());
+        transactionEntity.setPaymentMode(paymentMode.asText());
         transactionEntity.setTimestamp(new Timestamp(System.currentTimeMillis()));
         transactionRepo.save(transactionEntity);
         ObjectNode msg = objectMapper.createObjectNode();
@@ -86,6 +100,40 @@ public class TransactionServiceImpl implements TransactionService {
         msg.put("merchantName", transactionEntity.getMerchant().getName());
         msg.put("pgName", transactionEntity.getPaymentGateway().getName());
         return msg;
+    }
+
+    private void validateUsername(JsonNode username) {
+        if (username == null) {
+            throw new CustomException("Missing username field.");
+        }
+    }
+
+    private void validateMerchantName(JsonNode merchantName) {
+        if (merchantName == null) {
+            throw new CustomException("Missing merchantName field.");
+        }
+
+        if (merchantService.findByName(merchantName.asText()).isEmpty()) {
+            throw new CustomException("User not found");
+        }
+    }
+
+    private void validateAmount(JsonNode amount) {
+        if (amount == null) {
+            throw new CustomException("Missing amount field.");
+        }
+    }
+
+    private void validatePaymentMode(JsonNode paymentMode) {
+        if (paymentMode == null) {
+            throw new CustomException("Missing paymentMode field.");
+        }
+    }
+
+    private void validatePassword(JsonNode password) {
+        if (password == null) {
+            throw new CustomException("Missing password field.");
+        }
     }
 
     @Override

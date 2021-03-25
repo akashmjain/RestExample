@@ -7,8 +7,11 @@ import java.util.Optional;
 
 
 public interface MerchantService {
+
     public ObjectNode save(MerchantEntity merchantEntity);
+
     public Optional<MerchantEntity> findByName(String name);
+
     public Optional<MerchantEntity> findByUsername(String username);
 }
 

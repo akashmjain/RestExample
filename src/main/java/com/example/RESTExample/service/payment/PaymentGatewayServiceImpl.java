@@ -8,7 +8,6 @@ import com.example.RESTExample.service.merchant.MerchantService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +21,6 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     private final String PAYMENT_GATEWAY_CONST_STATUS_INACTIVE = "INACTIVE";
     private final String PAYMENT_GATEWAY_CONST_ENABLE_YES = "YES";
     private final String PAYMENT_GATEWAY_CONST_ENABLE_NO = "NO";
-
     private final String PAYMENT_GATEWAY_API_PAYMENT_GATEWAY_NAME = "pgName";
     private final String PAYMENT_GATEWAY_API_MERCHANT_NAME = "merchantName";
     private final String PAYMENT_GATEWAY_API_AMOUNT_MIN = "amountMin";
@@ -31,7 +29,6 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     private final String PAYMENT_GATEWAY_API_NB_ENABLED = "nbEnabled";
     private final String PAYMENT_GATEWAY_API_STATUS = "status";
     private final String PAYMENT_GATEWAY_API_PROCESSING_FEE = "processingFee";
-
     private PaymentGatewayRepo paymentGatewayRepo;
     private MerchantService merchantService;
     private ObjectMapper objectMapper;
@@ -136,6 +133,13 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         }
         if (status != null) {
             validateStatus(status);
+            if (!status.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_STATUS_INACTIVE)) {
+                for (PaymentGatewayEntity entity : pg.getMerchant().getPaymentGatewayEntities()) {
+                    if (entity.getStatus().equals(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE)) {
+                        throw new CustomException("Failed to persist, pg is already active for this merchant.");
+                    }
+                }
+            }
             pg.setStatus(status.asText());
         }
         if (processingFee != null) {
@@ -220,15 +224,6 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
             if (pg.getStatus().equals(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE) || pg.getName().equals(pgName.asText())) {
                 throw new CustomException("Failed to persist, pg is already active for this merchant. or pg with same name already exist.");
             }
-        }
-    }
-
-    private void requiredFieldsCheck(ObjectNode objectNode) {
-        if (objectNode.get(PAYMENT_GATEWAY_API_PAYMENT_GATEWAY_NAME) == null) {
-            throw new CustomException("Please provide pgName");
-        }
-        if (objectNode.get(PAYMENT_GATEWAY_API_MERCHANT_NAME) == null) {
-            throw new CustomException("Please provide merchantName");
         }
     }
 }

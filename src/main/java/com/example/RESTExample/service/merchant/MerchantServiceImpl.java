@@ -12,16 +12,14 @@ import java.util.Optional;
 
 @Service
 public class MerchantServiceImpl implements MerchantService {
-    private MerchantRepo merchantRepo;
 
+    private MerchantRepo merchantRepo;
     private ObjectMapper objectMapper;
 
-
-    public MerchantServiceImpl(MerchantRepo merchantRepo) {
+    public MerchantServiceImpl(MerchantRepo merchantRepo, ObjectMapper objectMapper) {
         this.merchantRepo = merchantRepo;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
     }
-
 
     @Override
     public ObjectNode save(MerchantEntity merchantEntity) {
@@ -53,6 +51,4 @@ public class MerchantServiceImpl implements MerchantService {
     public Optional<MerchantEntity> findByUsername(String username) {
         return merchantRepo.findByUsername(username);
     }
-
-
 }

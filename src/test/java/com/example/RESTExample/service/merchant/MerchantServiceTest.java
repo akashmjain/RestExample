@@ -20,11 +20,13 @@ public class MerchantServiceTest {
 
     private MerchantRepo merchantRepo;
     private MerchantService merchantService;
+    private ObjectMapper mapper;
 
     @BeforeEach
-    public void  beforeMethod() {
+    public void beforeMethod() {
         merchantRepo = Mockito.mock(MerchantRepo.class);
-        merchantService = new MerchantServiceImpl(merchantRepo);
+        mapper = new ObjectMapper();
+        merchantService = new MerchantServiceImpl(merchantRepo, mapper);
     }
 
     @Test

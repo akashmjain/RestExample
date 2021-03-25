@@ -24,7 +24,7 @@ class PaymentGatewayServiceTest {
     private ObjectNode objectNode;
 
     @BeforeEach
-    public void  beforeMethod() {
+    void beforeMethod() {
         paymentGatewayRepo = Mockito.mock(PaymentGatewayRepo.class);
         merchantService = Mockito.mock(MerchantService.class);
         mapper = new ObjectMapper();
@@ -156,7 +156,6 @@ class PaymentGatewayServiceTest {
         Assertions.assertEquals(expected, actual);
     }
 
-
     @Test
     void testCardEnabledMissingError() {
         objectNode = mapper.createObjectNode();
@@ -224,8 +223,8 @@ class PaymentGatewayServiceTest {
         String actual = e.getMessage();
         Assertions.assertEquals(expected, actual);
     }
-    /* PG Update Test */
 
+    /* PG Update Test */
     @Test
     void testSuccessfulUpdate() {
         objectNode = mapper.createObjectNode();
@@ -245,7 +244,6 @@ class PaymentGatewayServiceTest {
         paymentGateway.setNbEnabled("YES");
         paymentGateway.setStatus("INACTIVE");
         paymentGateway.setProcessingFee(50L);
-
         when(merchantService.findByName("FLIPKART")).thenReturn(Optional.of(merchant));
         when(paymentGatewayRepo.save(paymentGateway)).thenReturn(paymentGateway);
         when(paymentGatewayRepo.findByNameAndMerchant("GPAY", merchant)).thenReturn(paymentGateway);
@@ -277,8 +275,6 @@ class PaymentGatewayServiceTest {
         Assertions.assertEquals(expected, e.getMessage());
     }
 
-
-
     @Test
     void testUpdatePGNotFoundError() {
         objectNode = mapper.createObjectNode();
@@ -302,6 +298,47 @@ class PaymentGatewayServiceTest {
         objectNode.set("amountMin", mapper.convertValue("100", JsonNode.class));
         Exception e = Assertions.assertThrows(CustomException.class, () -> paymentGatewayService.updateWithObjectNode(objectNode));
         String expected = "Missing pgName field.";
+        Assertions.assertEquals(expected, e.getMessage());
+    }
+
+    @Test
+    void testUpdatePGAlreadyActiveError() {
+        objectNode = mapper.createObjectNode();
+        objectNode.set("pgName", mapper.convertValue("GPAY", JsonNode.class));
+        objectNode.set("merchantName", mapper.convertValue("FLIPKART", JsonNode.class));
+        objectNode.set("status", mapper.convertValue("ACTIVE", JsonNode.class));
+        MerchantEntity merchant = new MerchantEntity();
+        merchant.setName("FLIPKART");
+        merchant.setUsername("akash");
+        merchant.setPassword("12345");
+        // active payment gateway
+        PaymentGatewayEntity paymentGateway1 = new PaymentGatewayEntity();
+        paymentGateway1.setName("PHONEPE");
+        paymentGateway1.setMerchant(merchant);
+        paymentGateway1.setAmountMin(100L);
+        paymentGateway1.setAmountMax(1000L);
+        paymentGateway1.setCardEnabled("NO");
+        paymentGateway1.setNbEnabled("YES");
+        paymentGateway1.setStatus("ACTIVE");
+        paymentGateway1.setProcessingFee(50L);
+        // In active payment gateway.
+        PaymentGatewayEntity paymentGateway2 = new PaymentGatewayEntity();
+        paymentGateway2.setName("GPAY");
+        paymentGateway2.setMerchant(merchant);
+        paymentGateway2.setAmountMin(100L);
+        paymentGateway2.setAmountMax(1000L);
+        paymentGateway2.setCardEnabled("NO");
+        paymentGateway2.setNbEnabled("YES");
+        paymentGateway2.setStatus("INACTIVE");
+        paymentGateway2.setProcessingFee(50L);
+        merchant.addPaymentGatewayEntity(paymentGateway1);
+        merchant.addPaymentGatewayEntity(paymentGateway2);
+        when(merchantService.findByName("FLIPKART")).thenReturn(Optional.of(merchant));
+        when(paymentGatewayRepo.save(paymentGateway1)).thenReturn(paymentGateway1);
+        when(paymentGatewayRepo.findByNameAndMerchant("PHONEPE", merchant)).thenReturn(paymentGateway1);
+        when(paymentGatewayRepo.findByNameAndMerchant("GPAY", merchant)).thenReturn(paymentGateway2);
+        Exception e = Assertions.assertThrows(CustomException.class, () -> paymentGatewayService.updateWithObjectNode(objectNode));
+        String expected = "Failed to persist, pg is already active for this merchant.";
         Assertions.assertEquals(expected, e.getMessage());
     }
 }
