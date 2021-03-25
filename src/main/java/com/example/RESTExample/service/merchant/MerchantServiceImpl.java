@@ -12,22 +12,27 @@ import java.util.Optional;
 
 @Service
 public class MerchantServiceImpl implements MerchantService {
-    @Autowired
-    MerchantRepo merchantRepo;
+    private MerchantRepo merchantRepo;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
+
+
+    public MerchantServiceImpl(MerchantRepo merchantRepo) {
+        this.merchantRepo = merchantRepo;
+        this.objectMapper = new ObjectMapper();
+    }
+
 
     @Override
     public ObjectNode save(MerchantEntity merchantEntity) {
         if (merchantEntity.getName() == null) {
-            throw new CustomException("Please insert name in your request");
+            throw new CustomException("Please insert name in your request.");
         }
         if (merchantEntity.getUsername() == null) {
             throw new CustomException("Please insert username in your request.");
         }
         if (merchantEntity.getPassword() == null) {
-            throw new CustomException("please provide password in your request.");
+            throw new CustomException("Please provide password in your request.");
         }
         if (this.findByName(merchantEntity.getName()).isPresent()) {
             throw new CustomException("Merchant already present with the same name");
@@ -48,4 +53,6 @@ public class MerchantServiceImpl implements MerchantService {
     public Optional<MerchantEntity> findByUsername(String username) {
         return merchantRepo.findByUsername(username);
     }
+
+
 }

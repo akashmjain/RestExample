@@ -16,5 +16,4 @@ public class RestExampleApplication {
 	public ObjectMapper getObjectMapper() {
 		return new ObjectMapper();
 	}
-
 }

@@ -17,6 +17,7 @@ public class MerchantEntity {
     @OneToMany(mappedBy = "merchant")
     private List<TransactionEntity> transactions;
 
+
     public int getId() {
         return id;
     }
@@ -49,13 +50,13 @@ public class MerchantEntity {
         this.password = password;
     }
 
-    public List<PaymentGatewayEntity> getPaymentGateways() {
-        return paymentGatewayEntities;
-    }
-
-    public void setPaymentGateways(List<PaymentGatewayEntity> paymentGatewayEntities) {
-        this.paymentGatewayEntities = paymentGatewayEntities;
-    }
+//    public List<PaymentGatewayEntity> getPaymentGateways() {
+//        return paymentGatewayEntities;
+//    }
+//
+//    public void setPaymentGateways(List<PaymentGatewayEntity> paymentGatewayEntities) {
+//        this.paymentGatewayEntities = paymentGatewayEntities;
+//    }
 
     public List<PaymentGatewayEntity> getPaymentGatewayEntities() {
         return paymentGatewayEntities;

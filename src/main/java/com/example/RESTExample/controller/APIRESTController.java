@@ -32,6 +32,11 @@ public class APIRESTController {
     @Autowired
     ObjectMapper objectMapper;
 
+    @GetMapping("/echo")
+    public String hello() {
+        return "hello";
+    }
+
     @PostMapping("/createMerchant")
     public ResponseEntity<String> createMerchant(@RequestBody MerchantEntity merchantEntity) throws Exception {
         ObjectNode res = merchantService.save(merchantEntity);

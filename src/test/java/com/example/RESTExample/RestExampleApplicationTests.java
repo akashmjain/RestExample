@@ -8,6 +8,7 @@ class RestExampleApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }

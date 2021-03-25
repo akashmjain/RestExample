@@ -50,7 +50,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         // get active payment gateway.
         PaymentGatewayEntity activePaymentGateway = null;
-        for (PaymentGatewayEntity pg : merchantEntity.get().getPaymentGateways()) {
+        for (PaymentGatewayEntity pg : merchantEntity.get().getPaymentGatewayEntities()) {
             if (pg.getStatus().equals("ACTIVE")) {
                 activePaymentGateway = pg;
                 break;

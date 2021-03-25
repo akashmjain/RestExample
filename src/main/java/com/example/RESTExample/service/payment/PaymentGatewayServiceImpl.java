@@ -67,7 +67,7 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         // validation
         validateMerchant(merchantName);
         MerchantEntity merchant = merchantService.findByName(merchantName.asText()).get();
-        validatePaymentGateway(pgName, merchant.getPaymentGateways());
+        validatePaymentGateway(pgName, merchant.getPaymentGatewayEntities());
         validateAmountMinAndMax(amountMin.asLong(), amountMax.asLong());
         validateStatus(status);
         validateProcessingFee(processingFee);
