@@ -62,7 +62,7 @@ public class APIRESTController {
     }
 
     @GetMapping("/lastTransaction")
-    public ResponseEntity<String> getTransactions(@RequestParam("value") int value) throws Exception {
+    public ResponseEntity<String> getTransactions(@RequestParam(name = "value", defaultValue = "1") int value) throws Exception {
         List<ObjectNode> objectNodes = transactionService.getTransactions(value);
         return ResponseEntity.ok()
             .header("Content-Type", "application/json")

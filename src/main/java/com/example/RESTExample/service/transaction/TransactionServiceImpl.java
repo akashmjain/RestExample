@@ -29,14 +29,34 @@ public class TransactionServiceImpl implements TransactionService {
     private JsonNode amount;
     private JsonNode paymentMode;
     private JsonNode password;
-    TransactionRepo transactionRepo;
-    MerchantService merchantService;
-    ObjectMapper objectMapper;
+    private TransactionRepo transactionRepo;
+    private MerchantService merchantService;
+    private ObjectMapper objectMapper;
 
     public TransactionServiceImpl(TransactionRepo transactionRepo, MerchantService merchantService, ObjectMapper objectMapper) {
         this.transactionRepo = transactionRepo;
         this.merchantService = merchantService;
         this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public List<ObjectNode> getTransactions(int value) {
+        if (value < 0) {
+            throw new CustomException("Please provide proper value parameter.");
+        }
+        List<TransactionEntity> transactionEntities = transactionRepo.findTransactionEntityBySortOrder(value);
+        List<ObjectNode> objectNodes = new ArrayList<>();
+        transactionEntities.forEach(trans -> {
+            ObjectNode objectNode = objectMapper.createObjectNode();
+            objectNode.put("merchantName", trans.getMerchant().getName());
+            objectNode.put("PG", trans.getPaymentGateway().getName());
+            objectNode.put("username", trans.getMerchant().getUsername());
+            objectNode.put("amount", trans.getAmount());
+            objectNode.put("totalAmount", trans.getTotalAmount());
+            objectNode.put("paymentMode", trans.getPaymentMode());
+            objectNodes.add(objectNode);
+        });
+        return objectNodes;
     }
 
     @Override
@@ -48,19 +68,17 @@ public class TransactionServiceImpl implements TransactionService {
         password = objectNode.get(TRANSACTION_API_PASSWORD);
 
         validateUsername(username);
-        validateMerchantName(merchantName);
         validateAmount(amount);
         validatePaymentMode(paymentMode);
         validatePassword(password);
+        validateMerchantName(merchantName);
         Optional<MerchantEntity> merchantEntity = merchantService.findByName(merchantName.asText());
-        if (merchantEntity.isEmpty()) {
-            throw new CustomException("No such merchant present");
-        }
+
         if (!merchantEntity.get().getUsername().equals(username.asText())) {
-            throw new CustomException("Username is wrong");
+            throw new CustomException("Username is wrong.");
         }
         if (!merchantEntity.get().getPassword().equals(password.asText())) {
-            throw new CustomException("Password is wrong");
+            throw new CustomException("Password is wrong.");
         }
         // get active payment gateway.
         PaymentGatewayEntity activePaymentGateway = null;
@@ -71,18 +89,18 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         if (activePaymentGateway == null) {
-            throw new CustomException("No active payment for this merchant");
+            throw new CustomException("No active payment for this merchant.");
         }
         if (amount.asLong() < activePaymentGateway.getAmountMin() || amount.asLong() > activePaymentGateway.getAmountMax()) {
-            throw new CustomException("amount is not within limit");
+            throw new CustomException("Amount is not within limit.");
         }
         if (paymentMode.asText().equalsIgnoreCase("NB")) {
             if (activePaymentGateway.getNbEnabled().equals("NO")) {
-                throw new CustomException("Net Banking is not allowed");
+                throw new CustomException("Net banking is not allowed.");
             }
         } else if (paymentMode.asText().equalsIgnoreCase("CARD")) {
             if (activePaymentGateway.getCardEnabled().equals("NO")) {
-                throw new CustomException("Card banking is not allowed");
+                throw new CustomException("Card banking is not allowed.");
             }
         }
         TransactionEntity transactionEntity = new TransactionEntity();
@@ -114,7 +132,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         if (merchantService.findByName(merchantName.asText()).isEmpty()) {
-            throw new CustomException("User not found");
+            throw new CustomException("Merchant not found.");
         }
     }
 
@@ -134,23 +152,6 @@ public class TransactionServiceImpl implements TransactionService {
         if (password == null) {
             throw new CustomException("Missing password field.");
         }
-    }
-
-    @Override
-    public List<ObjectNode> getTransactions(int value) {
-        List<TransactionEntity> transactionEntities = transactionRepo.findTransactionEntityBySortOrder(value);
-        List<ObjectNode> objectNodes = new ArrayList<>();
-        transactionEntities.forEach(trans -> {
-            ObjectNode objectNode = objectMapper.createObjectNode();
-            objectNode.put("merchantName", trans.getMerchant().getName());
-            objectNode.put("PG", trans.getPaymentGateway().getName());
-            objectNode.put("username", trans.getMerchant().getUsername());
-            objectNode.put("amount", trans.getAmount());
-            objectNode.put("totalAmount", trans.getTotalAmount());
-            objectNode.put("paymentMode", trans.getPaymentMode());
-            objectNodes.add(objectNode);
-        });
-        return objectNodes;
     }
 }
 
