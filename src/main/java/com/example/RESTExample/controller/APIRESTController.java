@@ -47,7 +47,7 @@ public class APIRESTController {
     @PostMapping("/createPG")
     public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
         if (objectNode.size() != REST_REQUEST_PG_FIELD_COUNT) {
-            throw new CustomException("Please provide all fields necessary.");
+            throw new CustomException("Please provide properly formatted request.");
         }
         ObjectNode res = paymentGatewayService.saveWithObjectNode(objectNode);
         return ResponseEntity.ok()
@@ -58,7 +58,7 @@ public class APIRESTController {
     @PostMapping("/makePayment")
     public ResponseEntity<String> makePayment(@RequestBody ObjectNode objectNode) throws Exception {
         if (objectNode.size() != REST_REQUEST_MAKE_PAYMENT_FIELD_COUNT) {
-            throw new CustomException("Please provide all fields necessary");
+            throw new CustomException("Please provide properly formatted request.");
         }
         ObjectNode res = transactionService.makePayment(objectNode);
         return ResponseEntity.ok()
@@ -77,7 +77,7 @@ public class APIRESTController {
     @PutMapping("/updatePG")
     public ResponseEntity<String> updatePaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
         if (objectNode.size() > REST_REQUEST_PG_FIELD_COUNT) {
-            throw new CustomException("Please provide fields below or equal to " + REST_REQUEST_PG_FIELD_COUNT);
+            throw new CustomException("Please provide properly formatted request.");
         }
         ObjectNode res = paymentGatewayService.updateWithObjectNode(objectNode);
         return ResponseEntity.ok()
