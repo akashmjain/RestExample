@@ -21,16 +21,15 @@ import java.util.List;
 @RestController
 public class APIRESTController {
     @Autowired
-    MerchantService merchantService;
-
+    private MerchantService merchantService;
     @Autowired
-    PaymentGatewayService paymentGatewayService;
-
+    private PaymentGatewayService paymentGatewayService;
     @Autowired
-    TransactionService transactionService;
-
+    private TransactionService transactionService;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
+    private final int REST_REQUEST_PG_FIELD_COUNT = 8;
+    private final int REST_REQUEST_MAKE_PAYMENT_FIELD_COUNT = 5;
 
     @GetMapping("/echo")
     public String hello() {
@@ -47,6 +46,9 @@ public class APIRESTController {
 
     @PostMapping("/createPG")
     public ResponseEntity<String> createPaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
+        if (objectNode.size() != REST_REQUEST_PG_FIELD_COUNT) {
+            throw new CustomException("Please provide all fields necessary.");
+        }
         ObjectNode res = paymentGatewayService.saveWithObjectNode(objectNode);
         return ResponseEntity.ok()
             .header("Content-Type", "application/json")
@@ -55,6 +57,9 @@ public class APIRESTController {
 
     @PostMapping("/makePayment")
     public ResponseEntity<String> makePayment(@RequestBody ObjectNode objectNode) throws Exception {
+        if (objectNode.size() != REST_REQUEST_MAKE_PAYMENT_FIELD_COUNT) {
+            throw new CustomException("Please provide all fields necessary");
+        }
         ObjectNode res = transactionService.makePayment(objectNode);
         return ResponseEntity.ok()
             .header("Content-Type", "application/json")
@@ -71,6 +76,9 @@ public class APIRESTController {
 
     @PutMapping("/updatePG")
     public ResponseEntity<String> updatePaymentGateway(@RequestBody ObjectNode objectNode) throws Exception {
+        if (objectNode.size() > REST_REQUEST_PG_FIELD_COUNT) {
+            throw new CustomException("Please provide fields below or equal to " + REST_REQUEST_PG_FIELD_COUNT);
+        }
         ObjectNode res = paymentGatewayService.updateWithObjectNode(objectNode);
         return ResponseEntity.ok()
                 .header("Content-Type", "application/json")

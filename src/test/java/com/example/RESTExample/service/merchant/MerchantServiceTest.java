@@ -50,9 +50,7 @@ public class MerchantServiceTest {
         merchant.setUsername("akash");
         merchant.setPassword("12345");
         when(merchantRepo.findByName("FLIPKART")).thenReturn(Optional.of(merchant));
-        Exception e = Assertions.assertThrows(CustomException.class, () -> {
-            merchantService.save(merchant);
-        });
+        Exception e = Assertions.assertThrows(CustomException.class, () -> merchantService.save(merchant));
         String expectedMessage = "Merchant already present with the same name.";
         String actualMessage = e.getMessage();
         Assertions.assertEquals(expectedMessage, actualMessage);
@@ -63,9 +61,7 @@ public class MerchantServiceTest {
         MerchantEntity merchant = new MerchantEntity();
         merchant.setName("FLIPKART10");
         merchant.setPassword("12345");
-        Exception e = Assertions.assertThrows(CustomException.class, () -> {
-            merchantService.save(merchant);
-        });
+        Exception e = Assertions.assertThrows(CustomException.class, () -> merchantService.save(merchant));
         String expectedMessage = "Please insert username in your request.";
         String actualMessage = e.getMessage();
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
@@ -76,9 +72,7 @@ public class MerchantServiceTest {
         MerchantEntity merchant = new MerchantEntity();
         merchant.setName("FLIPKART");
         merchant.setUsername("akash");
-        Exception e = Assertions.assertThrows(CustomException.class, () -> {
-            merchantService.save(merchant);
-        });
+        Exception e = Assertions.assertThrows(CustomException.class, () -> merchantService.save(merchant));
         String expectedMessage = "Please provide password in your request.";
         String actualMessage = e.getMessage();
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
@@ -89,16 +83,9 @@ public class MerchantServiceTest {
         MerchantEntity merchant = new MerchantEntity();
         merchant.setUsername("akash");
         merchant.setPassword("12345");
-        Exception e = Assertions.assertThrows(CustomException.class, () -> {
-            merchantService.save(merchant);
-        });
+        Exception e = Assertions.assertThrows(CustomException.class, () -> merchantService.save(merchant));
         String expectedMessage = "Please insert name in your request.";
         String actualMessage = e.getMessage();
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
-    }
-
-    @AfterEach
-    public void afterMethod() {
-        // nothing to do for now.
     }
 }

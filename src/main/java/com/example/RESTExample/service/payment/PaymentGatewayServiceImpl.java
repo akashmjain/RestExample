@@ -29,9 +29,9 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
     private final String PAYMENT_GATEWAY_API_NB_ENABLED = "nbEnabled";
     private final String PAYMENT_GATEWAY_API_STATUS = "status";
     private final String PAYMENT_GATEWAY_API_PROCESSING_FEE = "processingFee";
-    private PaymentGatewayRepo paymentGatewayRepo;
-    private MerchantService merchantService;
-    private ObjectMapper objectMapper;
+    private final PaymentGatewayRepo paymentGatewayRepo;
+    private final MerchantService merchantService;
+    private final ObjectMapper objectMapper;
 
     public PaymentGatewayServiceImpl(PaymentGatewayRepo paymentGatewayRepo, MerchantService merchantService, ObjectMapper objectMapper) {
         this.paymentGatewayRepo = paymentGatewayRepo;

@@ -13,8 +13,8 @@ import java.util.Optional;
 @Service
 public class MerchantServiceImpl implements MerchantService {
 
-    private MerchantRepo merchantRepo;
-    private ObjectMapper objectMapper;
+    private final MerchantRepo merchantRepo;
+    private final ObjectMapper objectMapper;
 
     public MerchantServiceImpl(MerchantRepo merchantRepo, ObjectMapper objectMapper) {
         this.merchantRepo = merchantRepo;

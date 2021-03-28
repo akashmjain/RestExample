@@ -9,29 +9,20 @@ import com.example.RESTExample.service.merchant.MerchantService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
 import java.sql.Timestamp;
 import java.util.*;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
-    final private String TRANSACTION_API_USERNAME = "username";
-    final private String TRANSACTION_API_MERCHANT_NAME = "merchantName";
-    final private String TRANSACTION_API_AMOUNT = "amount";
-    final private String TRANSACTION_API_PAYMENT_MODE = "paymentMode";
-    final private String TRANSACTION_API_PASSWORD = "password";
-    private JsonNode username;
-    private JsonNode merchantName;
-    private JsonNode amount;
-    private JsonNode paymentMode;
-    private JsonNode password;
-    private TransactionRepo transactionRepo;
-    private MerchantService merchantService;
-    private ObjectMapper objectMapper;
+    private final String TRANSACTION_API_USERNAME = "username";
+    private final String TRANSACTION_API_MERCHANT_NAME = "merchantName";
+    private final String TRANSACTION_API_AMOUNT = "amount";
+    private final String TRANSACTION_API_PAYMENT_MODE = "paymentMode";
+    private final String TRANSACTION_API_PASSWORD = "password";
+    private final TransactionRepo transactionRepo;
+    private final MerchantService merchantService;
+    private final ObjectMapper objectMapper;
 
     public TransactionServiceImpl(TransactionRepo transactionRepo, MerchantService merchantService, ObjectMapper objectMapper) {
         this.transactionRepo = transactionRepo;
@@ -61,11 +52,11 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public ObjectNode makePayment(ObjectNode objectNode) {
-        username = objectNode.get(TRANSACTION_API_USERNAME);
-        merchantName = objectNode.get(TRANSACTION_API_MERCHANT_NAME);
-        amount = objectNode.get(TRANSACTION_API_AMOUNT);
-        paymentMode = objectNode.get(TRANSACTION_API_PAYMENT_MODE);
-        password = objectNode.get(TRANSACTION_API_PASSWORD);
+        JsonNode username = objectNode.get(TRANSACTION_API_USERNAME);
+        JsonNode merchantName = objectNode.get(TRANSACTION_API_MERCHANT_NAME);
+        JsonNode amount = objectNode.get(TRANSACTION_API_AMOUNT);
+        JsonNode paymentMode = objectNode.get(TRANSACTION_API_PAYMENT_MODE);
+        JsonNode password = objectNode.get(TRANSACTION_API_PASSWORD);
 
         validateUsername(username);
         validateAmount(amount);
