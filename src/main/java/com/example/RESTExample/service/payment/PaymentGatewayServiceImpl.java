@@ -68,8 +68,8 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         validateStatus(status);
         validateProcessingFee(processingFee);
         MerchantEntity merchant = merchantService.findByName(merchantName.asText()).get();
-        validatePaymentGateway(pgName, merchant.getPaymentGatewayEntities());
-
+//        validatePaymentGateway(pgName, merchant.getPaymentGatewayEntities());
+        validatePaymentGateway(pgName, merchant);
         // save pg
         PaymentGatewayEntity paymentGateway = new PaymentGatewayEntity();
         paymentGateway.setName(pgName.asText());
@@ -134,11 +134,15 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         if (status != null) {
             validateStatus(status);
             if (!status.asText().equalsIgnoreCase(PAYMENT_GATEWAY_CONST_STATUS_INACTIVE)) {
-                for (PaymentGatewayEntity entity : pg.getMerchant().getPaymentGatewayEntities()) {
-                    if (entity.getStatus().equals(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE)) {
-                        throw new CustomException("Failed to persist, pg is already active for this merchant.");
-                    }
+                if (paymentGatewayRepo.findByStatusAndMerchant(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE, pg.getMerchant()).isPresent()) {
+                    throw new CustomException("Failed to persist, pg is already active for this merchant.");
                 }
+                // core java way of finding pg with ACTIVE status
+//                for (PaymentGatewayEntity entity : pg.getMerchant().getPaymentGatewayEntities()) {
+//                    if (entity.getStatus().equals(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE)) {
+//                        throw new CustomException("Failed to persist, pg is already active for this merchant.");
+//                    }
+//                }
             }
             pg.setStatus(status.asText());
         }
@@ -216,14 +220,23 @@ public class PaymentGatewayServiceImpl implements PaymentGatewayService {
         }
     }
 
-    private void validatePaymentGateway(JsonNode pgName, List<PaymentGatewayEntity> pgs) {
-        if (pgs == null) {
-            return;
+    private void validatePaymentGateway(JsonNode pgName, MerchantEntity merchantEntity) {
+        if(paymentGatewayRepo.findByNameAndMerchant(pgName.asText(), merchantEntity) != null) {
+            throw new CustomException("Failed to persist, pg with same name already exists.");
         }
-        for (PaymentGatewayEntity pg : pgs) {
-            if (pg.getStatus().equals(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE) || pg.getName().equals(pgName.asText())) {
-                throw new CustomException("Failed to persist, pg is already active for this merchant. or pg with same name already exist.");
-            }
+        if (paymentGatewayRepo.findByStatusAndMerchant(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE, merchantEntity).isPresent()) {
+            throw new CustomException("Failed to persist, pg is already active for this merchant.");
         }
     }
+
+//    private void validatePaymentGateway(JsonNode pgName, List<PaymentGatewayEntity> pgs) {
+//        if (pgs == null) {
+//            return;
+//        }
+//        for (PaymentGatewayEntity pg : pgs) {
+//            if (pg.getStatus().equals(PAYMENT_GATEWAY_CONST_STATUS_ACTIVE) || pg.getName().equals(pgName.asText())) {
+//                throw new CustomException("Failed to persist, pg is already active for this merchant. or pg with same name already exist.");
+//            }
+//        }
+//    }
 }
