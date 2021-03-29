@@ -225,7 +225,7 @@ class PaymentGatewayServiceTest {
     }
 
     @Test
-    void testSameNamePGAlreadyExist() {
+    void testSameNamePGAlreadyExistError() {
         objectNode = mapper.createObjectNode();
         objectNode.set("pgName", mapper.convertValue("GPAY", JsonNode.class));
         objectNode.set("merchantName", mapper.convertValue("FLIPKART", JsonNode.class));
@@ -250,20 +250,44 @@ class PaymentGatewayServiceTest {
         paymentGateway.setNbEnabled("YES");
         paymentGateway.setStatus("INACTIVE");
         paymentGateway.setProcessingFee(50L);
+        when(paymentGatewayRepo.findByNameAndMerchant("GPAY", merchant)).thenReturn(paymentGateway);
+        when(merchantService.findByName("FLIPKART")).thenReturn(Optional.of(merchant));
+        Exception e = Assertions.assertThrows(CustomException.class, () -> paymentGatewayService.saveWithObjectNode(objectNode));
+        String expected = "Failed to persist, pg with same name already exists.";
+        String actual = e.getMessage();
+        Assertions.assertEquals(expected, actual);
+    }
 
-        when(paymentGatewayRepo.findByNameAndMerchant("GPAY", Mockito.any(MerchantEntity.class))).thenReturn(paymentGateway);
-
-//        when(merchantService.findByName("FLIPKART")).thenReturn(Optional.of(merchant));
-//        when(paymentGatewayRepo.save(paymentGateway)).thenReturn(paymentGateway);
-
-        paymentGatewayService.saveWithObjectNode(objectNode);
-        ObjectMapper objectMapper= new ObjectMapper();
-        ObjectNode expected = objectMapper.createObjectNode();
-        expected.put("success", true);
-        expected.put("pgName", paymentGateway.getName());
-        expected.put("status", paymentGateway.getStatus());
-        Assertions.assertEquals(expected, paymentGatewayService.saveWithObjectNode(objectNode));
-
+    @Test
+    void testPGIsAlreadyActiveError() {
+        objectNode = mapper.createObjectNode();
+        objectNode.set("pgName", mapper.convertValue("GPAY", JsonNode.class));
+        objectNode.set("merchantName", mapper.convertValue("FLIPKART", JsonNode.class));
+        objectNode.set("amountMin", mapper.convertValue("100", JsonNode.class));
+        objectNode.set("amountMax", mapper.convertValue("1000", JsonNode.class));
+        objectNode.set("cardEnabled", mapper.convertValue("No", JsonNode.class));
+        objectNode.set("nbEnabled", mapper.convertValue("Yes", JsonNode.class));
+        objectNode.set("status", mapper.convertValue("INACTIVE", JsonNode.class));
+        objectNode.set("processingFee", mapper.convertValue("50", JsonNode.class));
+        MerchantEntity merchant = new MerchantEntity();
+        merchant.setName("FLIPKART");
+        merchant.setUsername("akash");
+        merchant.setPassword("12345");
+        PaymentGatewayEntity paymentGateway = new PaymentGatewayEntity();
+        paymentGateway.setName("GPAY");
+        paymentGateway.setMerchant(merchant);
+        paymentGateway.setAmountMin(10L);
+        paymentGateway.setAmountMax(1000L);
+        paymentGateway.setCardEnabled("NO");
+        paymentGateway.setNbEnabled("YES");
+        paymentGateway.setStatus("ACTIVE");
+        paymentGateway.setProcessingFee(50L);
+        when(merchantService.findByName("FLIPKART")).thenReturn(Optional.of(merchant));
+        when(paymentGatewayRepo.findByStatusAndMerchant("ACTIVE", merchant)).thenReturn(Optional.of(paymentGateway));
+        Exception e = Assertions.assertThrows(CustomException.class, () -> paymentGatewayService.saveWithObjectNode(objectNode));
+        String expected = "Failed to persist, pg is already active for this merchant.";
+        String actual = e.getMessage();
+        Assertions.assertEquals(expected, actual);
     }
 
     /* PG Update Test */
